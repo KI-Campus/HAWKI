@@ -234,11 +234,13 @@
 								echo
 									'<select id="model-selector" onchange="OnDropdownModelSelection()">
 										<option value="gpt-4o">OpenAI GPT-4o</option>
+										<option value="gpt-4o-mini">OpenAI GPT-4o Mini</option>
+										
 										<option value="meta-llama-3.1-8b-instruct">meta-llama-3.1-8b-instruct</option>
 										<option value="meta-llama-3.1-70b-instruct">meta-llama-3.1-70b-instruct</option>
 										<option value="llama-3-sauerkrautlm-70b-instruct">Llama 3 70B Sauerkraut</option>
-										<option value="mixtral-8x7b-instruct">Mixtral-8x7b-instruct</option>
-										<option value="qwen2-72b-instruct">Qwen 2 72B Instruct</option>
+										<option value="mistral-large-instruct">Mistral Large Instruct</option>
+										<option value="qwen2.5-72b-instruct">Qwen 2.5 72B Instruct</option>
 									</select>';
 							}
 							else{
@@ -429,14 +431,15 @@
 		activeModel = model;
 		switch(activeModel){
 			case('gpt-4o'):
+			case('gpt-4o-mini'):
 				streamAPI = "api/stream-api";
 				break;
 
 			case('meta-llama-3.1-8b-instruct'):
 			case('meta-llama-3.1-70b-instruct'):
 			case('llama-3-sauerkrautlm-70b-instruct'):
-			case('mixtral-8x7b-instruct'):
-			case('qwen2-72b-instruct'):
+			case('mistral-large-instruct'):
+			case('qwen2.5-72b-instruct'):
 				streamAPI = 'api/GWDG-api';
 				break;
 		}
@@ -505,6 +508,11 @@
 		messageElements.forEach(messageElement => {
 			let messageObject = {};
 			messageObject.role = messageElement.dataset.role;
+			
+			if(activeModel === 'mistral-large-instruct' && messageObject.role === 'system'){
+				messageObject.role = 'user';
+			}
+
 			messageObject.content = messageElement.querySelector(".message-text").textContent;
 			requestObject.messages.push(messageObject);
 		})
