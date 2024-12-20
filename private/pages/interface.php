@@ -47,7 +47,7 @@
 	<?php if (isset($_SESSION['csrf_token'])) : ?>
 		<meta name="csrf-token" content="<?php echo $_SESSION['csrf_token']; ?>">
 	<?php endif; ?>
-	<title>HAWKI</title>
+	<title>KI-Campus Chat-Sandbox</title>
 
 
 	<link rel="stylesheet" href="public/style/style.css">
