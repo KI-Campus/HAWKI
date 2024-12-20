@@ -327,6 +327,7 @@
   padding: 2rem;
   position: relative;
   background-color: var(--background-color);
+  padding-top: 3rem; /* extra space required for absolute positioned .input-controlbar */
 }
 
 .input {
