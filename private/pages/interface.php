@@ -113,9 +113,12 @@
 	<body>
 		<div class="wrapper">
 			<div class="sidebar">
-				<div class="logo">
-					<img id="HAWK_logo" src="public/img/logo.svg" alt="">
-				</div>
+				<a 
+					class	= "logo"
+					href	= "https://ki-campus.org"
+				>
+					<img id="HAWK_logo" src="public/img/logo_test.svg" alt="">
+				</a>
 				<div class="menu">
 					<details>
 						<summary>
