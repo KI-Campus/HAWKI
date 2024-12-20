@@ -1,4 +1,12 @@
 {
 	"BetaMessage": "Version 1.0",	
-    "System_Content": "You are a helpful assistant who works at the online learning platform “KI-Campus”."
+    "System_Content": "You are a helpful assistant who works at the online learning platform “KI-Campus”.",
+    
+    "InputField_Placeholder": "Hier können Sie Ihre Anfrage stellen",
+    "dialogueWithFinanceAdvisor": "Sie unterhalten Sich jetzt mit Julia, einer fiktiven Finanzberaterin. Was möchten Sie über Finanzen wissen?",
+    "lawDialogueIntroduction": "Sie unterhalten Sich jetzt mit Luis, einem fiktiven Rechtsberater. Was möchten Sie über Rechtsberatung wissen?",
+    "marketingDialogueIntroduction": "Sie unterhalten Sich jetzt mit Felix, einem fiktiven Marketing-Mitarbeiter. Was möchten Sie über Marketing wissen?",
+    "programmingDialogueIntroduction": "Sie unterhalten Sich jetzt mit Fatima, einer fiktiven Programmiererin. Was möchten Sie über Programmierung wissen?",
+    "scienceDialogueIntroduction": "Sie unterhalten Sich jetzt mit Sophie, einer fiktiven Forscherin. Was möchten Sie über Forschung wissen?",
+    "socialMediaDialogueIntroduction": "Sie unterhalten Sich jetzt mit Erik, einem fiktiven Social-Media-Mitarbeiter. Was möchten Sie über Social Media wissen?",   
 }
