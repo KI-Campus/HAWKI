@@ -113,11 +113,8 @@
 	<body>
 		<div class="wrapper">
 			<div class="sidebar">
-				<a 
-					class	= "logo"
-					href	= "https://ki-campus.org"
-				>
-					<img id="HAWK_logo" src="public/img/logo_test.svg" alt="">
+				<a class="logo" href="https://ki-campus.org">
+					<img id="HAWK_logo" src="public/img/logo.svg" alt="">
 				</a>
 				<div class="menu">
 					<details>
