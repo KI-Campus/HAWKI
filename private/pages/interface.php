@@ -232,15 +232,15 @@
 						<?php
 							if(isset($env) ? array_key_exists("MODEL_SELECTOR_ACTIVATION", $env) && $env["MODEL_SELECTOR_ACTIVATION"] === "true" : strtolower(getenv("MODEL_SELECTOR_ACTIVATION")) === "true"){
 								echo
-									'<select id="model-selector" onchange="OnDropdownModelSelection()">
-										<option value="gpt-4o">OpenAI GPT-4o</option>
-										<option value="gpt-4o-mini">OpenAI GPT-4o Mini</option>
-										
+									'<select id="model-selector" onchange="OnDropdownModelSelection()">										
 										<option value="meta-llama-3.1-8b-instruct">meta-llama-3.1-8b-instruct</option>
 										<option value="meta-llama-3.1-70b-instruct">meta-llama-3.1-70b-instruct</option>
 										<option value="llama-3-sauerkrautlm-70b-instruct">Llama 3 70B Sauerkraut</option>
 										<option value="mistral-large-instruct">Mistral Large Instruct</option>
 										<option value="qwen2.5-72b-instruct">Qwen 2.5 72B Instruct</option>
+
+										<option value="gpt-4o">OpenAI GPT-4o</option>
+										<option value="gpt-4o-mini">OpenAI GPT-4o Mini</option>
 									</select>';
 							}
 							else{
@@ -408,15 +408,15 @@
 	});
 
 
-
-	let activeModel = "gpt-4o";
+	let defaultModel = "meta-llama-3.1-8b-instruct"
+	let activeModel = defaultModel;
 	let streamAPI = "";
 	window.addEventListener('DOMContentLoaded', (event) => {
 		if(localStorage.getItem("definedModel")){
 			SwitchModel(localStorage.getItem("definedModel"));
 		}
 		else{
-			SwitchModel("gpt-4o");
+			SwitchModel(defaultModel);
 		}
 		document.getElementById("model-selector").value = activeModel;
     });
