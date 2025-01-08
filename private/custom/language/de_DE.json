@@ -8,5 +8,8 @@
     "marketingDialogueIntroduction": "Sie unterhalten Sich jetzt mit Felix, einem fiktiven Marketing-Mitarbeiter. Was möchten Sie über Marketing wissen?",
     "programmingDialogueIntroduction": "Sie unterhalten Sich jetzt mit Fatima, einer fiktiven Programmiererin. Was möchten Sie über Programmierung wissen?",
     "scienceDialogueIntroduction": "Sie unterhalten Sich jetzt mit Sophie, einer fiktiven Forscherin. Was möchten Sie über Forschung wissen?",
-    "socialMediaDialogueIntroduction": "Sie unterhalten Sich jetzt mit Erik, einem fiktiven Social-Media-Mitarbeiter. Was möchten Sie über Social Media wissen?"   
+    "socialMediaDialogueIntroduction": "Sie unterhalten Sich jetzt mit Erik, einem fiktiven Social-Media-Mitarbeiter. Was möchten Sie über Social Media wissen?",
+
+    "welcomeBackTitle": "Willkommen beim KI-Campus LLM-Chat!",
+    "infoPanel_Content": "<h1 class=\"headerLine\">  KI-Campus LLM-Chat</h1> <p>Hier kannst du mit verschiedenen großen Sprachmodellen (LLMs) experimentieren und Texte generieren lassen. Melde dich dazu einfach mit deinem KI-Campus-Account an.</p>"
 }

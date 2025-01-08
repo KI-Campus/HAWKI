@@ -1,3 +1,6 @@
 {
-    "BetaMessage": "Versione 1.0"
+    "BetaMessage": "Versione 1.0",
+
+    "welcomeBackTitle": "Benvenuti alla LLM-Chat di AI Campus!"      ,
+    "infoPanel_Content": "<h1 class=\"headerLine\">AI Campus LLM-Chat</h1> <p>Qui è possibile sperimentare vari Large Language Models (LLM) e generare testi. È sufficiente accedere con il proprio account AI Campus.</p>"
 }

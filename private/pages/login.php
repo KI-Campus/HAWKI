@@ -134,9 +134,9 @@
 							<?php echo $translation['infoPanel_Content']; ?>
 						</div>
 					</div>
-					<form class="submitButtonPanel" target="_blank" action="https://elearning.hawk.de/de/ki-studium-und-lehre">
+<!-- 					<form class="submitButtonPanel" target="_blank" action="https://elearning.hawk.de/de/ki-studium-und-lehre">
 						<button type="submit"><?php echo $translation["aiOverviewPage"]; ?></button>
-					</form>
+					</form> -->
 				</div>
 				<div class="backgroundImageContainer">
 					<video class="image_preview_container" src="public/img/HAWKIBG.m4v" type="video/m4v" preload = "none" autoplay loop muted></video>

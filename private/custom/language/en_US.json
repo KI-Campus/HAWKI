@@ -1,4 +1,7 @@
 {
     "BetaMessage": "Version 1.0",
-    "System_Content": "You are a helpful assistant who works at the online learning platform “KI-Campus”."
+    "System_Content": "You are a helpful assistant who works at the online learning platform “KI-Campus”.",
+
+    "welcomeBackTitle": "Welcome to the AI Campus LLM-Chat!",
+    "infoPanel_Content": "<h1 class=\"headerLine\">AI Campus LLM-Chat</h1> <p>Here you can experiment with various Large Language Models (LLMs) and generate texts. Simply log in with your AI Campus account.</p>"
 }
