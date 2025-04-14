@@ -139,7 +139,8 @@
 					</form> -->
 				</div>
 				<div class="backgroundImageContainer">
-					<video class="image_preview_container" src="public/img/HAWKIBG.m4v" type="video/m4v" preload = "none" autoplay loop muted></video>
+					<div class="image_preview_container"></div>
+					<!-- <video class="image_preview_container" src="public/img/HAWKIBG.m4v" type="video/m4v" preload = "none" autoplay loop muted></video> -->
 				</div>
 			</main>
 		</div>
