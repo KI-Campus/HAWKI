@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Symfony\Component\HttpFoundation\Response;
+
+
+class SessionExpiryChecker
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param Closure(Request): (Response) $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        if(Auth::user()->isRemoved === true){
+            return redirect('/logout')->withErrors('Your account has been suspended.');
+        }
+
+        if(Session::get('lastActivity')){
+            if ((time() - Session::get('lastActivity')) > (config('session.lifetime') * 60))
+            {
+                return redirect('/logout')->withErrors('You must authenticate first.');
+            }
+        }
+        Session::put('lastActivity',time());
+
+        return $next($request);
+    }
+}

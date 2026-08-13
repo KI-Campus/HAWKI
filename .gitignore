@@ -1,3 +1,60 @@
+# Environment variables
 .env
+.env.backup
+.env.private
+.env.production
+
+# Packages
+node_modules
+vendor
+
+# Generated icons
+resources/js/components/ui/icons/iconset/*
+
+# Credentials
+auth.json
+
+# Editors
+.idea/*
+.fleet
+.vscode
+/.fleet
+/.idea
+/.vscode
+
+# PHPUnit
+.phpunit.coverage
+.phpunit.feature.coverage
+.phpunit.result.cache
+.phpunit.cache
+
+# PHP CS Fixer
+.php-cs-fixer.cache
+
+# Documentation
+_documentation.build/build
+_documentation.build/.docusaurus
+
+# Docker
+docker-compose.override.yml
+_docker_production_test
+!/_docker_production/.env
+
+# Assets and local storage
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+
+# Stuff
+npm-debug.log
+yarn-error.log
 .DS_Store
-/private/custom
+_architecture
+
+# Dev Stuff
+DbgCommand.php
+_docker_production_test
+.devcontainer
+.agents
+skills-lock.json

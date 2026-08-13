@@ -1,0 +1,265 @@
+<?php
+
+namespace App\Http\Controllers;
+
+
+use App\Services\Announcements\AnnouncementService;
+use App\Services\Auth\Contract\AuthServiceInterface;
+use App\Services\Auth\Contract\AuthServiceWithCredentialsInterface;
+use App\Services\Auth\Contract\AuthServiceWithLogoutRedirectInterface;
+use App\Services\Auth\Contract\AuthServiceWithPostProcessingInterface;
+use App\Services\Auth\Exception\AuthFailedException;
+use App\Services\Auth\Value\AuthenticatedUserInfo;
+use App\Services\System\Database\Eloquent\Repositories\Value\ScopeOverrides;
+use App\Services\Users\Repositories\UserRepository;
+use Cookie;
+use Illuminate\Auth\AuthManager;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Response;
+
+class AuthenticationController extends Controller
+{
+    public function __construct(
+        protected AuthServiceInterface   $authService,
+        protected LanguageController     $languageController,
+        private readonly LoggerInterface $logger,
+        private readonly UserRepository  $userRepository
+    )
+    {
+    }
+
+    public function handleLogin(Request $request): Response
+    {
+        /**
+         * Based on the actual AuthService implementation,
+         * we may need to set credentials before calling authenticate.
+         * This closure handles that logic.
+         * It will always return either AuthenticatedUserInfo or a Response.
+         * @return AuthenticatedUserInfo|Response
+         */
+        $callAuthenticate = function () use ($request) {
+            if ($this->authService instanceof AuthServiceWithCredentialsInterface) {
+                if (!$request->isMethod('POST')) {
+                    throw new AuthFailedException('Login must be performed via POST method.', 400);
+                }
+                try {
+                    $credentials = $request->validate([
+                        'account' => 'required|string',
+                        'password' => 'required|string',
+                    ]);
+
+                    $this->authService->useCredentials(
+                        filter_var($credentials['account'], FILTER_UNSAFE_RAW),
+                        $credentials['password']
+                    );
+
+                    return $this->authService->authenticate($request);
+                } catch (ValidationException $e) {
+                    throw new AuthFailedException('Username and password are required for login.', 400, $e);
+                } finally {
+                    $this->authService->forgetCredentials();
+                }
+            }
+
+            return $this->authService->authenticate($request);
+        };
+
+        $authHasForm = $this->authService instanceof AuthServiceWithCredentialsInterface;
+
+        /**
+         * A small helper to respond according to request method
+         * Handles both GET (redirect) and POST (JSON) requests
+         * This is required, because some authentication methods (e.g. Shibboleth, OIDC)
+         * initiate login via GET requests and expect a redirect response.
+         * @param string $url
+         * @return RedirectResponse|JsonResponse
+         */
+        $respond = static function (string $url) use ($authHasForm) {
+            if (!$authHasForm) {
+                return redirect($url);
+            }
+
+            return response()->json([
+                'success' => true,
+                'redirectUri' => $url,
+            ]);
+        };
+
+        try {
+            $authenticateResult = $callAuthenticate();
+
+            if ($authenticateResult instanceof Response) {
+                return $authenticateResult;
+            }
+
+            $this->logger->info('LOGIN: ' . $authenticateResult->username);
+
+            $user = $this->userRepository->findOneByUsername(
+                $authenticateResult->username,
+                ScopeOverrides::makeWithForcefullyDisabled('access')
+            );
+
+            if ($user) {
+                Auth::login($user);
+
+                if ($this->authService instanceof AuthServiceWithPostProcessingInterface) {
+                    $postProcessResponse = $this->authService->afterLoginWithUser($user, $request);
+                    if ($postProcessResponse !== null) {
+                        return $postProcessResponse;
+                    }
+                }
+
+                return $respond('/handshake');
+            }
+
+            if ($this->authService instanceof AuthServiceWithPostProcessingInterface) {
+                $postProcessResponse = $this->authService->afterLoginWithoutUser($authenticateResult, $request);
+                if ($postProcessResponse !== null) {
+                    return $postProcessResponse;
+                }
+            }
+
+            $request->session()->put([
+                'registration_access' => true,
+                'authenticatedUserInfo' => json_encode($authenticateResult)
+            ]);
+
+            return $respond('/register');
+        } catch (\Throwable $e) {
+            $error = $e instanceof AuthFailedException ? $e->getMessage() : 'An unexpected error occurred during authentication.';
+
+            $this->logger->warning('Failed login attempt', ['exception' => $e]);
+
+            if ($authHasForm) {
+                // Tell the form that the login failed...
+                return response()->json([
+                    'success' => false,
+                    'error' => $error,
+                    'message' => 'Login Failed!',
+                ]);
+            }
+
+            // Redirect back to login with error message
+            return redirect('/login')->withErrors(['login_error' => $error]);
+        }
+    }
+
+
+    /// Initiate handshake process
+    /// sends back the user keychain.
+    /// keychain sync will be done on the frontend side (check encryption.js)
+    public function handshake(Request $request)
+    {
+        $activeOverlay = false;
+        if (Session::get('last-route') && Session::get('last-route') != 'handshake') {
+            $activeOverlay = true;
+        }
+        Session::put('last-route', 'handshake');
+
+        // Pass translation, authenticationMethod, and authForms to the view
+        return view('partials.gateway.handshake', compact('activeOverlay'));
+
+    }
+
+
+    /// Redirect user to registration page
+    public function register(Request $request)
+    {
+
+        if (Auth::check()) {
+            // The user is logged in, redirect to /chat
+            return redirect('/handshake');
+        }
+
+        $activeOverlay = false;
+        if (Session::get('last-route') && Session::get('last-route') != 'register') {
+            $activeOverlay = true;
+        }
+        Session::put('last-route', 'register');
+
+        // Pass translation, authenticationMethod, and authForms to the view
+        return view('partials.gateway.register', compact('activeOverlay'));
+    }
+
+
+
+    /// Setup User
+    /// Create backup for userkeychain on the DB
+    public function completeRegistration(
+        Request             $request,
+        UserRepository      $userRepository,
+        AnnouncementService $announcementService,
+        AuthManager         $auth
+    )
+    {
+        try {
+            if (!$request->getUserContext()->isRegisteringUser()) {
+                abort(403, 'No registration in progress');
+            }
+
+            // Retrieve user info from session
+            $userInfo = $request->getUserContext()->getRegisteringUser();
+
+            // Update or create the local user
+            $user = $userRepository->insert(
+                username: $userInfo->username,
+                name: $userInfo->name,
+                email: $userInfo->email,
+                employeeType: $userInfo->employeeType
+            );
+
+            try {
+                $policy = $announcementService->fetchLatestPolicy();
+                $announcementService->markAnnouncementAsSeen($user, $policy->id);
+                $announcementService->markAnnouncementAsAccepted($user, $policy->id);
+            } catch (\Throwable) {
+            }
+
+            // Log the user in
+            $session = $request->session();
+            $session->put('authenticatedUserInfo', null);
+            $session->put('registration_access', false);
+            $auth->login($user);
+
+            return response()->json([
+                'success' => true,
+                'redirectUri' => '/chat',
+                'userData' => $user,
+            ])->withHeaders(['X-HAWKI-CSRF-TOKEN' => $request->session()->token()]);
+
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        // First build the redirect response, so we still have all user- and session-data available.
+        $response = redirect('/login');
+        if ($this->authService instanceof AuthServiceWithLogoutRedirectInterface) {
+            $serviceResponse = $this->authService->getLogoutResponse($request);
+            if ($serviceResponse !== null) {
+                $response = $serviceResponse;
+            }
+        }
+
+        // Log out the user
+        Auth::logout();
+
+        // Invalidate the session (flushes + regenerates token)
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Clear PHPSESSID cookie (optional, Laravel doesn’t use PHPSESSID by default)
+        Cookie::queue(Cookie::forget('PHPSESSID'));
+
+        return $response;
+    }
+
+}
